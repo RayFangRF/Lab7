@@ -22,6 +22,9 @@ int main() {
 
     cin >> option;
 }
+
+
+
 struct Arsenal{
     string weaponName;
     int weaponNumber;
@@ -35,6 +38,24 @@ struct Battleship{
     float maxWarpSpeed;
     vector<Arsenal> inventory;
 };
+void printShip(Battleship &ship){
+    cout<<"Name: "<< ship.shipName<<endl;
+    cout<<"Class: "<<ship.shipClass<<endl;
+    cout<<"Length: "<<ship.shipLength<<endl;
+    cout<<"Shield capacity: "<<ship.shieldCapacity<<endl;
+    cout<<"Maximum Warp: "<<ship.maxWarpSpeed<<endl;
+    cout<<"Armaments: "<<endl;
+    if(ship.inventory.size() != 0){
+        for(inti i = 0; i < ship.inventory.size(); i++){
+            cout<<ship.inventory.at(i).weaponName<<", "<< ship.inventory.at(i).weaponNumber<<", "<<ship.inventory.at(i).weaponPower<<endl;
+        }
+    } else{
+        cout<<"Unarmed"<<endl;
+    }
+    cout<<endl;
+}
+
+
 void loadFile(vector<Battleship>& ships, int fileNum){
     string path;
     if(fileNum == 1){
