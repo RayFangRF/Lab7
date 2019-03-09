@@ -4,35 +4,13 @@
 #include <string>
 typedef unsigned int inti;
 using namespace std;
-int main() {
-    cout << "Which file(s) to open?\n";
-    cout << "1. friendlyships.shp" << endl;
-    cout << "2. enemyships.shp" << endl;
-    cout << "3. Both files" << endl;
-    int option;
-    cin >> option;
-
-    /* Load files here */
-
-    cout << "1. Print all ships" << endl;
-    cout << "2. Starship with the strongest weapon" << endl;
-    cout << "3. Strongest starship overall" << endl;
-    cout << "4. Weakest ship (ignoring unarmed)" << endl;
-    cout << "5. Unarmed ships" << endl;
-
-    cin >> option;
-}
-
-
-
 struct Arsenal{
     string weaponName;
     float weaponPowerConsumption;
     int weaponPower;
     Arsenal(){
-        weaponPowerConsumption = 0;
-        weaponPower = 0.0;
-        weaponName = nullptr;
+        weaponPowerConsumption = 0.0;
+        weaponPower = 0;
     }
 };
 struct Battleship{
@@ -43,11 +21,9 @@ struct Battleship{
     float maxWarpSpeed;
     vector<Arsenal> inventory;
     Battleship(){
-     shipName = nullptr;
-     shipClass = nullptr;
-     shipLength = 0;
-     shieldCapacity = 0;
-     maxWarpSpeed = 0.0;
+        shipLength = 0;
+        shieldCapacity = 0;
+        maxWarpSpeed = 0.0;
     }
 };
 void printShip(Battleship &ship){
@@ -87,18 +63,18 @@ void loadFile(vector<Battleship>& ships, int fileNum){
             inti classLength;
             inti inventorySize = 0;
             file.read((char*)&nameLength, 4);
-            file.read((char*)&classLength, 4);
             char* shipName = new char[nameLength];
-            char* className = new char[classLength];
             for(inti j = 0; j< nameLength; j++){
                 file.read(&shipName[j], 1);
             }
+            newShip.shipName = shipName;
+            delete[] shipName;
+            file.read((char*)&classLength, 4);
+            char* className = new char[classLength];
             for(inti z = 0; z< classLength; z++){
                 file.read(&className[z], 1);
             }
-            newShip.shipName = shipName;
             newShip.shipClass = className;
-            delete[] shipName;
             delete[] className;
             file.read((char*) &newShip.shipLength,2);
             file.read((char*) &newShip.shieldCapacity, 4);
@@ -110,7 +86,7 @@ void loadFile(vector<Battleship>& ships, int fileNum){
                 for(inti u = 0; u < inventorySize; u++){
                     file.read((char*) &nameLength,4);
                     char* name = new char[nameLength];
-                    for(inti a = 0; a >nameLength; a++){
+                    for(inti a = 0; a < nameLength; a++){
                         file.read(&name[a],1);
                     }
                     ars.weaponName = name;
@@ -177,4 +153,53 @@ void weakestShip(vector<Battleship> &ships){
     }
     printShip(weakestShip);
 }
+void unarmedShips(vector<Battleship> &ships){
+    for(inti i = 0; i < ships.size(); i++){
+        if(ships[i].inventory.size() == 0){
+            printShip(ships[i]);
+        }
+    }
+}
 
+int main() {
+    cout << "Which file(s) to open?\n";
+    cout << "1. friendlyships.shp" << endl;
+    cout << "2. enemyships.shp" << endl;
+    cout << "3. Both files" << endl;
+    int option;
+    cin >> option;
+
+    /* Load files here */
+    vector<Battleship> ships;
+    if(option == 1){
+        loadFile(ships, 1);
+    }else if(option == 2){
+        loadFile(ships,2);
+    }else if(option == 3){
+        loadFile(ships,1);
+        loadFile(ships, 2);
+    }else{
+        cout<<"invalid input"<<endl;
+    }
+
+    cout << "1. Print all ships" << endl;
+    cout << "2. Starship with the strongest weapon" << endl;
+    cout << "3. Strongest starship overall" << endl;
+    cout << "4. Weakest ship (ignoring unarmed)" << endl;
+    cout << "5. Unarmed ships" << endl;
+
+    cin >> option;
+    if(option == 1){
+        printAll(ships);
+    }else if(option == 2){
+        printStrongestShip(ships);
+    }else if(option == 3){
+        strongestOverall(ships);
+    }else if(option ==4){
+        weakestShip(ships);
+    }else if(option ==5){
+        unarmedShips(ships);
+    }else{
+        cout<<"invalid input"<<endl;
+    }
+}
