@@ -19,6 +19,7 @@ struct Battleship{
     short shipLength;
     int shieldCapacity;
     float maxWarpSpeed;
+    int totalFirePower;
     vector<Arsenal> inventory;
     Battleship(){
         shipLength = 0;
@@ -37,6 +38,7 @@ void printShip(Battleship &ship){
         for(inti i = 0; i < ship.inventory.size(); i++){
             cout<<ship.inventory.at(i).weaponName<<", "<< ship.inventory.at(i).weaponPower<<", "<<ship.inventory.at(i).weaponPowerConsumption<<endl;
         }
+        cout<<"Total firepower: "<<ship.totalFirePower<<endl;
     } else{
         cout<<"Unarmed"<<endl;
     }
@@ -83,6 +85,7 @@ void loadFile(vector<Battleship>& ships, int fileNum){
             //load in inventory
             if(inventorySize > 0){
                 Arsenal ars;
+                int totalPower = 0;
                 for(inti u = 0; u < inventorySize; u++){
                     file.read((char*) &nameLength,4);
                     char* name = new char[nameLength];
@@ -92,13 +95,14 @@ void loadFile(vector<Battleship>& ships, int fileNum){
                     ars.weaponName = name;
                     delete[] name;
                     file.read((char*)&ars.weaponPower, 4);
+                    totalPower += ars.weaponPower;
                     file.read((char*)&ars.weaponPowerConsumption, 4);
                     newShip.inventory.push_back(ars);
                 }
-
+                newShip.totalFirePower = totalPower;
+                totalPower = 0;
             }
             ships.push_back(newShip);
-
         }
         file.close();
     }
@@ -108,50 +112,36 @@ void printAll(vector<Battleship> &ships){
         printShip(ships.at((i)));
     }
 }
-void printStrongestShip(vector<Battleship> &ships){
-    Battleship strong = ships.at(0);
-    for(inti i = 0; i < ships.size()-1; i++){
-        for(inti j = 0; i < ships[i].inventory.size(); j++){
-            if(ships[i].inventory[j+1].weaponPower > ships[i].inventory[j].weaponPower){
-                strong = ships[i+1];
+void printStrongestWeapon(vector<Battleship> &ships){
+    Battleship strongestWeapon = ships.at(0);
+    int greatestWeaponPower = 0;
+    for(inti i = 0; i < ships.size(); i++){
+        for(inti j = 0; j < ships[i].inventory.size(); j++){
+            if(ships[i].inventory[j].weaponPower > greatestWeaponPower){
+                greatestWeaponPower = ships[i].inventory[j].weaponPower;
+                strongestWeapon = ships[i];
             }
+        }
+    }
+    printShip(strongestWeapon);
+}
+void strongestOverall(vector<Battleship> &ships) {
+    Battleship strong = ships.at(0);
+    for (inti i = 0; i < ships.size(); i++) {
+        if (ships[i].totalFirePower > strong.totalFirePower) {
+            strong = ships[i];
         }
     }
     printShip(strong);
 }
-void strongestOverall(vector<Battleship> &ships){
-    inti totalPower;
-    inti mostPower = 0;
-    Battleship strongestShip = ships[0];
-    for(inti i = 0; i < ships.size(); i++){
-        totalPower = 0;
-        for(inti j = 0; j < ships[i].inventory.size(); j++){
-            totalPower += ships[i].inventory[j].weaponPower;
-        }
-        if(totalPower > mostPower){
-            strongestShip = ships.at(i);
-            mostPower = totalPower;
-        }
-    }
-    printShip(strongestShip);
-}
 void weakestShip(vector<Battleship> &ships){
-    inti totalPower;
-    inti leastPower = 0;
-    Battleship weakestShip = ships[0];
-    for(inti i = 0; i < ships.size(); i++){
-        totalPower = 0;
-        for(inti j = 0; j < ships[i].inventory.size(); j++){
-            if(ships[i].inventory.size() != 0){
-                totalPower += ships[i].inventory[j].weaponPower;
-            }
-        }
-        if(totalPower < leastPower){
-            weakestShip = ships.at(i);
-            leastPower = totalPower;
+    Battleship weak = ships.at(0);
+    for (inti i = 0; i < ships.size(); i++) {
+        if (ships[i].totalFirePower < weak.totalFirePower) {
+            weak = ships[i];
         }
     }
-    printShip(weakestShip);
+    printShip(weak);
 }
 void unarmedShips(vector<Battleship> &ships){
     for(inti i = 0; i < ships.size(); i++){
@@ -192,7 +182,7 @@ int main() {
     if(option == 1){
         printAll(ships);
     }else if(option == 2){
-        printStrongestShip(ships);
+        printStrongestWeapon(ships);
     }else if(option == 3){
         strongestOverall(ships);
     }else if(option ==4){
